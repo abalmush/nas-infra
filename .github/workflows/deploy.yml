@@ -28,7 +28,10 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.NAS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "Host *" > ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "  UserKnownHostsFile /dev/null" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
       - name: Create proxy network
         run: |
