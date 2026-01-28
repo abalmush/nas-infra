@@ -1,0 +1,7 @@
+market.indexlab.com {
+	reverse_proxy market-data-frontend:3000
+}
+
+context.indexlab.com {
+	reverse_proxy context-app:3000
+}
