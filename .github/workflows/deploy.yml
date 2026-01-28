@@ -8,6 +8,10 @@ concurrency:
   group: deploy-nas-infra
   cancel-in-progress: true
 
+env:
+  SSH_CMD: ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}
+  DOCKER_PATH: /usr/local/bin
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -37,19 +41,20 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
             ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-            "docker network create proxy 2>/dev/null || true"
+            "export PATH=\$PATH:${{ env.DOCKER_PATH }} && docker network create proxy 2>/dev/null || true"
 
       - name: Copy Caddy files
         run: |
-          SSH_CMD="ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}"
-          $SSH_CMD "mkdir -p ~/caddy"
-          cat caddy/docker-compose.yml | $SSH_CMD "cat > ~/caddy/docker-compose.yml"
-          cat caddy/Caddyfile | $SSH_CMD "cat > ~/caddy/Caddyfile"
+          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}"
+          $SSH "mkdir -p ~/caddy"
+          cat caddy/docker-compose.yml | $SSH "cat > ~/caddy/docker-compose.yml"
+          cat caddy/Caddyfile | $SSH "cat > ~/caddy/Caddyfile"
 
       - name: Deploy Caddy
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
             ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'DEPLOY_SCRIPT'
+          export PATH=$PATH:/usr/local/bin
           cd ~/caddy
           docker compose pull
           docker compose up -d --force-recreate
@@ -58,10 +63,11 @@ jobs:
 
       - name: Health check
         run: |
+          sleep 5
           for i in $(seq 1 10); do
             if ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
               ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-              "docker exec caddy wget -q -O /dev/null http://localhost:2019/config/"; then
+              "export PATH=\$PATH:/usr/local/bin && docker exec caddy wget -q -O /dev/null http://localhost:2019/config/"; then
               echo "Caddy health check passed"
               exit 0
             fi
