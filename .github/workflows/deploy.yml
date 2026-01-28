@@ -38,12 +38,10 @@ jobs:
 
       - name: Copy Caddy files
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
-            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-            "mkdir -p ~/caddy"
-          scp -i ~/.ssh/deploy_key -P ${{ secrets.NAS_PORT }} \
-            caddy/docker-compose.yml caddy/Caddyfile \
-            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}:~/caddy/
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}"
+          $SSH_CMD "mkdir -p ~/caddy"
+          cat caddy/docker-compose.yml | $SSH_CMD "cat > ~/caddy/docker-compose.yml"
+          cat caddy/Caddyfile | $SSH_CMD "cat > ~/caddy/Caddyfile"
 
       - name: Deploy Caddy
         run: |
