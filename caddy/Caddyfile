@@ -1,7 +1,15 @@
-market.indexlab.com {
-	reverse_proxy market-data-frontend:3000
-}
+:80 {
+	@market host market.indexlab.com
+	handle @market {
+		reverse_proxy market-data-frontend:3000
+	}
 
-context.indexlab.com {
-	reverse_proxy context-app:3000
+	@context host context.indexlab.com
+	handle @context {
+		reverse_proxy context-app:3000
+	}
+
+	handle {
+		respond "Not Found" 404
+	}
 }
