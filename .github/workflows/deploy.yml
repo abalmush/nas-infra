@@ -61,7 +61,7 @@ jobs:
           for i in $(seq 1 10); do
             if ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
               ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-              "docker exec caddy wget -q --spider http://localhost:80"; then
+              "docker exec caddy wget -q -O /dev/null http://localhost:2019/config/"; then
               echo "Caddy health check passed"
               exit 0
             fi
