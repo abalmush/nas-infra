@@ -52,21 +52,16 @@ jobs:
           cat caddy/Dockerfile | $SSH "cat > ~/caddy/Dockerfile"
 
       - name: Deploy Caddy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
-            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << DEPLOY_SCRIPT
-          export PATH=\$PATH:/usr/local/bin
-          cd ~/caddy
-
-          echo "CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}" > .env
-          chmod 600 .env
-
-          docker compose build --no-cache
-          docker compose up -d --force-recreate
-          docker image prune -f
-          DEPLOY_SCRIPT
+            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
+            "export PATH=\$PATH:/usr/local/bin && \
+             cd ~/caddy && \
+             echo 'CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}' > .env && \
+             chmod 600 .env && \
+             docker compose build --no-cache && \
+             docker compose up -d --force-recreate && \
+             docker image prune -f"
 
       - name: Health check
         run: |
