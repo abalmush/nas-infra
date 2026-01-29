@@ -1,10 +1,10 @@
 :80 {
-	@market host market.indexlab.com
+	@market host market.inexlab.com
 	handle @market {
 		reverse_proxy market-data-frontend:3000
 	}
 
-	@context host context.indexlab.com
+	@context host context.inexlab.com
 	handle @context {
 		reverse_proxy context-app:3000
 	}
