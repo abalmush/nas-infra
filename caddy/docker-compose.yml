@@ -11,7 +11,7 @@ services:
       - "8443:443"
       - "8443:443/udp"
     environment:
-      - GODADDY_API_TOKEN=${GODADDY_API_TOKEN}
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

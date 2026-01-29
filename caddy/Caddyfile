@@ -1,17 +1,13 @@
 market.inexlab.com {
 	tls {
-		dns godaddy {
-			api_token {env.GODADDY_API_TOKEN}
-		}
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
 	reverse_proxy market-data-frontend:3000
 }
 
 context.inexlab.com {
 	tls {
-		dns godaddy {
-			api_token {env.GODADDY_API_TOKEN}
-		}
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
 	reverse_proxy context-app:3000
 }
