@@ -7,9 +7,9 @@ services:
     container_name: caddy
     restart: unless-stopped
     ports:
-      - "8080:80"
-      - "8443:443"
-      - "8443:443/udp"
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
     environment:
       - GODADDY_API_TOKEN=${GODADDY_API_TOKEN}
     volumes:
