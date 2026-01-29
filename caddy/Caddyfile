@@ -1,15 +1,13 @@
-:80 {
-	@market host market.inexlab.com
-	handle @market {
-		reverse_proxy market-data-frontend:3000
+market.inexlab.com {
+	tls {
+		dns godaddy {env.GODADDY_API_TOKEN}
 	}
+	reverse_proxy market-data-frontend:3000
+}
 
-	@context host context.inexlab.com
-	handle @context {
-		reverse_proxy context-app:3000
+context.inexlab.com {
+	tls {
+		dns godaddy {env.GODADDY_API_TOKEN}
 	}
-
-	handle {
-		respond "Not Found" 404
-	}
+	reverse_proxy context-app:3000
 }

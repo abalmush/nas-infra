@@ -49,21 +49,28 @@ jobs:
           $SSH "mkdir -p ~/caddy"
           cat caddy/docker-compose.yml | $SSH "cat > ~/caddy/docker-compose.yml"
           cat caddy/Caddyfile | $SSH "cat > ~/caddy/Caddyfile"
+          cat caddy/Dockerfile | $SSH "cat > ~/caddy/Dockerfile"
 
       - name: Deploy Caddy
+        env:
+          GODADDY_API_TOKEN: ${{ secrets.GODADDY_API_KEY }}:${{ secrets.GODADDY_API_SECRET }}
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
-            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'DEPLOY_SCRIPT'
-          export PATH=$PATH:/usr/local/bin
+            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << DEPLOY_SCRIPT
+          export PATH=\$PATH:/usr/local/bin
           cd ~/caddy
-          docker compose pull
+
+          echo "GODADDY_API_TOKEN=${GODADDY_API_TOKEN}" > .env
+          chmod 600 .env
+
+          docker compose build --no-cache
           docker compose up -d --force-recreate
           docker image prune -f
           DEPLOY_SCRIPT
 
       - name: Health check
         run: |
-          sleep 5
+          sleep 10
           for i in $(seq 1 10); do
             if ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
               ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \

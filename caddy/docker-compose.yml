@@ -1,12 +1,17 @@
 services:
   caddy:
-    image: caddy:2-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: caddy-godaddy:latest
     container_name: caddy
     restart: unless-stopped
     ports:
       - "8080:80"
       - "8443:443"
       - "8443:443/udp"
+    environment:
+      - GODADDY_API_TOKEN=${GODADDY_API_TOKEN}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
