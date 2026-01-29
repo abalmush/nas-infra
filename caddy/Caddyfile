@@ -1,24 +1,24 @@
-market.inexlab.com {
-	tls {
-		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+:80 {
+	@market host market.inexlab.com
+	handle @market {
+		reverse_proxy market-data-frontend:3000
 	}
-	reverse_proxy market-data-frontend:3000
-}
 
-context.inexlab.com {
-	tls {
-		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	@context host context.inexlab.com
+	handle @context {
+		reverse_proxy context-app:3000
 	}
-	reverse_proxy context-app:3000
-}
 
-dsm.inexlab.com {
-	tls {
-		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
-	}
-	reverse_proxy https://host.docker.internal:5001 {
-		transport http {
-			tls_insecure_skip_verify
+	@dsm host dsm.inexlab.com
+	handle @dsm {
+		reverse_proxy https://host.docker.internal:5001 {
+			transport http {
+				tls_insecure_skip_verify
+			}
 		}
+	}
+
+	handle {
+		respond "Not Found" 404
 	}
 }
