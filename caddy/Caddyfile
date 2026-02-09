@@ -9,6 +9,11 @@
 		reverse_proxy context-app:3000
 	}
 
+	@tradeforge host trade.inexlab.com
+	handle @tradeforge {
+		reverse_proxy tradeforge-backend:8000
+	}
+
 	@dsm host dsm.inexlab.com
 	handle @dsm {
 		reverse_proxy https://host.docker.internal:5001 {
