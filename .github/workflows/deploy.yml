@@ -101,25 +101,6 @@ jobs:
             ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "cat > ~/n8n/.env"
           rm -f /tmp/n8n.env
 
-      - name: Debug n8n env and test DB connection
-        run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
-            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'ENDSSH'
-          echo "=== .env file (cat -A) ==="
-          cat -A ~/n8n/.env
-          echo "=== end ==="
-
-          echo "=== Testing postgres connection from context-postgres ==="
-          export PATH=$PATH:/volume1/@appstore/ContainerManager/usr/bin
-          docker exec context-postgres psql -U postgres -c "SELECT 1" && echo "AUTH OK" || echo "AUTH FAILED"
-
-          echo "=== Checking context .env ==="
-          cat -A ~/context/.env
-
-          echo "=== Checking n8n docker-compose env vars ==="
-          docker inspect n8n --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null | grep -E "DB_|POSTGRES" || echo "container not running"
-          ENDSSH
-
       - name: Deploy n8n
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
