@@ -7,9 +7,9 @@ services:
       - GENERIC_TIMEZONE=America/New_York
       - TZ=America/New_York
       - N8N_HOST=n8n.inexlab.com
-      - N8N_PROTOCOL=http
+      - N8N_PROTOCOL=https
       - N8N_PORT=5678
-      - WEBHOOK_URL=http://n8n.inexlab.com/
+      - WEBHOOK_URL=https://n8n.inexlab.com/
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - DB_TYPE=postgresdb

@@ -71,7 +71,7 @@ Push to the `main` branch of `nas-infra` to trigger the GitHub Actions workflow.
 
 ## Post-Deployment
 
-- Access n8n at `http://n8n.inexlab.com` (via Caddy on port 8080, or however your external routing is configured)
+- Access n8n at `https://n8n.inexlab.com`
 - On first launch, n8n will prompt you to **create an owner account**
 - All workflows, credentials, and execution history are persisted in Postgres + the `n8n_data` volume
 
