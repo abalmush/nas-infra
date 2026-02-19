@@ -95,9 +95,11 @@ jobs:
 
       - name: Create n8n environment file
         run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
-            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-            "printf 'POSTGRES_PASSWORD=%s\nN8N_ENCRYPTION_KEY=%s\n' '${{ secrets.POSTGRES_PASSWORD }}' '${{ secrets.N8N_ENCRYPTION_KEY }}' > ~/n8n/.env"
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" > /tmp/n8n.env
+          echo "N8N_ENCRYPTION_KEY=${{ secrets.N8N_ENCRYPTION_KEY }}" >> /tmp/n8n.env
+          cat /tmp/n8n.env | ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
+            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "cat > ~/n8n/.env"
+          rm -f /tmp/n8n.env
 
       - name: Deploy n8n
         run: |
