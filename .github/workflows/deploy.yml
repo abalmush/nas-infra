@@ -101,6 +101,12 @@ jobs:
             ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "cat > ~/n8n/.env"
           rm -f /tmp/n8n.env
 
+      - name: Debug n8n env file
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
+            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
+            "echo '--- .env contents ---' && cat -A ~/n8n/.env && echo '--- end ---'"
+
       - name: Deploy n8n
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
