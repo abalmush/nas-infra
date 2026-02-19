@@ -77,43 +77,6 @@ jobs:
           echo "Health check failed"
           exit 1
 
-      - name: Setup wildcard SSL certificate
-        run: |
-          ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
-            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} << 'ENDSSH'
-          
-          # Check if acme.sh is installed
-          if [ ! -f /usr/local/share/acme.sh/acme.sh ]; then
-            echo "Installing acme.sh..."
-            cd /tmp
-            wget -q https://github.com/acmesh-official/acme.sh/archive/master.tar.gz
-            tar xf master.tar.gz
-            cd acme.sh-master
-            ./acme.sh --install --nocron --home /usr/local/share/acme.sh --accountemail "acme@inexlab.com"
-            rm -rf /tmp/acme.sh-master /tmp/master.tar.gz
-          fi
-
-          cd /usr/local/share/acme.sh
-
-          # Issue wildcard cert if not already present
-          if [ ! -f "/usr/local/share/acme.sh/*.inexlab.com_ecc/fullchain.cer" ]; then
-            echo "Issuing wildcard certificate for *.inexlab.com..."
-            export CF_Token="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            ./acme.sh --issue --server letsencrypt --home . \
-              -d "*.inexlab.com" -d "inexlab.com" \
-              --dns dns_cf --keylength ec-384
-          else
-            echo "Wildcard certificate already exists"
-          fi
-
-          # Deploy to Synology DSM
-          echo "Deploying certificate to DSM..."
-          export SYNO_USE_TEMP_ADMIN=1
-          export SYNO_CREATE=1
-          ./acme.sh --deploy --home . -d "*.inexlab.com" --deploy-hook synology_dsm --insecure
-          
-          ENDSSH
-
       - name: Setup n8n database and network
         run: |
           ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
