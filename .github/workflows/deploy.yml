@@ -61,7 +61,7 @@ jobs:
              docker compose up -d --force-recreate && \
              docker image prune -f"
 
-      - name: Health check
+      - name: Caddy health check
         run: |
           sleep 10
           for i in $(seq 1 10); do
@@ -75,6 +75,56 @@ jobs:
             sleep 3
           done
           echo "Health check failed"
+          exit 1
+
+      - name: Setup n8n database and network
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
+            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
+            "export PATH=\$PATH:${{ env.DOCKER_PATH }} && \
+             docker network create postgres-net 2>/dev/null || true && \
+             docker network connect postgres-net context-postgres 2>/dev/null || true && \
+             docker exec context-postgres psql -U postgres -tc \"SELECT 1 FROM pg_database WHERE datname = 'n8n'\" | grep -q 1 || \
+             docker exec context-postgres psql -U postgres -c 'CREATE DATABASE n8n'"
+
+      - name: Copy n8n files
+        run: |
+          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }}"
+          $SSH "mkdir -p ~/n8n"
+          cat n8n/docker-compose.yml | $SSH "cat > ~/n8n/docker-compose.yml"
+
+      - name: Create n8n environment file
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
+            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
+            "printf 'POSTGRES_PASSWORD=%s\nN8N_ENCRYPTION_KEY=%s\n' '${{ secrets.POSTGRES_PASSWORD }}' '${{ secrets.N8N_ENCRYPTION_KEY }}' > ~/n8n/.env"
+
+      - name: Deploy n8n
+        run: |
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
+            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
+            "export PATH=\$PATH:${{ env.DOCKER_PATH }} && \
+             cd ~/n8n && \
+             docker compose up -d --force-recreate && \
+             docker image prune -f"
+
+      - name: n8n health check
+        run: |
+          sleep 15
+          for i in $(seq 1 10); do
+            if ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
+              ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
+              "export PATH=\$PATH:${{ env.DOCKER_PATH }} && docker exec n8n wget -q --spider http://localhost:5678/healthz"; then
+              echo "n8n health check passed"
+              exit 0
+            fi
+            echo "Attempt $i/10 - waiting..."
+            sleep 5
+          done
+          echo "n8n health check failed"
+          ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
+            ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
+            "export PATH=\$PATH:${{ env.DOCKER_PATH }} && docker logs n8n --tail 50"
           exit 1
 
       - name: Cleanup SSH
