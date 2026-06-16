@@ -28,6 +28,16 @@
 		}
 	}
 
+	@dyllu host dyllu.inexlab.com
+	handle @dyllu {
+		reverse_proxy dyllu-storefront:3000
+	}
+
+	@dyllu-api host medusa.inexlab.com
+	handle @dyllu-api {
+		reverse_proxy dyllu-backend:9000
+	}
+
 	handle {
 		respond "Not Found" 404
 	}
