@@ -157,7 +157,7 @@ jobs:
           for i in $(seq 1 10); do
             if ssh -i ~/.ssh/deploy_key -p ${{ secrets.NAS_PORT }} \
               ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} \
-              "export PATH=\$PATH:${{ env.DOCKER_PATH }} && docker exec cloudflared wget -q --spider http://localhost:2000/metrics"; then
+              "export PATH=\$PATH:${{ env.DOCKER_PATH }} && docker logs cloudflared --tail 50 2>&1 | grep -q 'Registered tunnel connection'"; then
               echo "Cloudflared health check passed"
               exit 0
             fi
