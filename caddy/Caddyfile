@@ -30,12 +30,16 @@
 
 	@dyllu host dyllu.inexlab.com
 	handle @dyllu {
-		reverse_proxy dyllu-storefront:3000
+		reverse_proxy dyllu-storefront:3000 {
+			header_up X-Forwarded-Proto https
+		}
 	}
 
 	@dyllu-api host medusa.inexlab.com
 	handle @dyllu-api {
-		reverse_proxy dyllu-backend:9000
+		reverse_proxy dyllu-backend:9000 {
+			header_up X-Forwarded-Proto https
+		}
 	}
 
 	handle {
